@@ -12,6 +12,7 @@ namespace Unity
     /// <summary>
     /// Interface defining the behavior of the Unity dependency injection container.
     /// </summary>
+    [CLSCompliant(true)]
     public interface IUnityContainer : IDisposable
     {
         /// <summary>
@@ -91,24 +92,6 @@ namespace Unity
         object Configure(Type configurationInterface);
 
         /// <summary>
-        /// Remove all installed extensions typeFrom this container.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// This method removes all extensions typeFrom the container, including the default ones
-        /// that implement the out-of-the-box behavior. After this method, if you want to use
-        /// the container again you will need to either read the default extensions or replace
-        /// them with your own.
-        /// </para>
-        /// <para>
-        /// The registered instances and singletons that have already been set up in this container
-        /// do not get removed.
-        /// </para>
-        /// </remarks>
-        /// <returns>The <see cref="IUnityContainer"/> object that this method was called on (this in C#, Me in Visual Basic).</returns>
-        IUnityContainer RemoveAllExtensions();
-
-        /// <summary>
         /// The parent of this container.
         /// </summary>
         /// <value>The parent container, or null if this container doesn'type have one.</value>
@@ -122,6 +105,9 @@ namespace Unity
         /// settings or lifetime.</remarks>
         /// <returns>The new child container.</returns>
         IUnityContainer CreateChildContainer();
+
+        // TODO: Add summary
+        bool IsRegistered(Type type, string name);
 
         /// <summary>
         /// GetOrDefault a sequence of <see cref="IContainerRegistration"/> that describe the current state

@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using Unity.Builder;
-using Unity.Policy;
 
 namespace Unity.Lifetime
 {
@@ -34,13 +32,9 @@ namespace Unity.Lifetime
             _value = new WeakReference(newValue);
         }
 
-        /// <summary>
-        /// Remove the given object from backing store.
-        /// </summary>
-        /// <param name="container">Instance of container</param>
-        public override void RemoveValue(ILifetimeContainer container = null)
+        protected override LifetimeManager OnCreateLifetimeManager()
         {
-            // DO NOTHING - we don't own this instance.
+            return new ExternallyControlledLifetimeManager();
         }
     }
 }

@@ -32,22 +32,9 @@ namespace Unity.Lifetime
             return value;
         }
 
-        /// <summary>
-        /// Stores the given value into backing store for retrieval later. In this class,
-        /// this is a noop, since it has special hooks down in the guts.
-        /// </summary>
-        /// <param name="container">Instance of container which owns the value</param>
-        /// <param name="newValue">The object being stored.</param>
-        public override void SetValue(object newValue, ILifetimeContainer container = null)
+        protected override LifetimeManager OnCreateLifetimeManager()
         {
-        }
-
-        /// <summary>
-        /// Remove the given object from backing store. Noop in this class.
-        /// </summary>
-        /// <param name="container">Instance of container</param>
-        public override void RemoveValue(ILifetimeContainer container = null)
-        {
+            return new PerResolveLifetimeManager();
         }
     }
 }

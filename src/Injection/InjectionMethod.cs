@@ -48,9 +48,11 @@ namespace Unity.Injection
             ValidateMethodCanBeInjected(methodInfo, implementationType);
 
             SpecifiedMethodsSelectorPolicy selector =
-                GetSelectorPolicy(policies, implementationType, name);
+                GetSelectorPolicy(policies, serviceType, name);
             selector.AddMethodAndParameters(methodInfo, _methodParameters);
         }
+
+        public override bool BuildRequired => true;
 
         /// <summary>
         /// A small function to handle name matching. You can override this
@@ -140,12 +142,11 @@ namespace Unity.Injection
 
         private static SpecifiedMethodsSelectorPolicy GetSelectorPolicy(IPolicyList policies, Type typeToCreate, string name)
         {
-            var key = new NamedTypeBuildKey(typeToCreate, name);
-            var selector = policies.GetNoDefault<IMethodSelectorPolicy>(key);
+            var selector = policies.Get(typeToCreate, name, typeof(IMethodSelectorPolicy), out _);
             if (!(selector is SpecifiedMethodsSelectorPolicy))
             {
                 selector = new SpecifiedMethodsSelectorPolicy();
-                policies.Set(selector, key);
+                policies.Set(typeToCreate, name, typeof(IMethodSelectorPolicy), selector);
             }
             return (SpecifiedMethodsSelectorPolicy)selector;
         }

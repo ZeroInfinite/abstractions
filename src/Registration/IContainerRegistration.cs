@@ -6,26 +6,25 @@ using Unity.Lifetime;
 namespace Unity.Registration
 {
     /// <summary>
-    /// Class that returns information about the types registered in a container.
+    /// Information about the types registered in a container.
     /// </summary>
     public interface IContainerRegistration
     {
         /// <summary>
-        /// The type that was passed to the <see cref="IUnityContainer.RegisterType"/> method
-        /// as the "from" type, or the only type if type mapping wasn't done.
+        /// Type of the registration.
         /// </summary>
         Type RegisteredType { get; }
 
         /// <summary>
-        /// The type that this registration is mapped to. If no type mapping was done, the
-        /// <see cref="RegisteredType"/> property and this one will have the same value.
-        /// </summary>
-        Type MappedToType { get; }
-
-        /// <summary>
-        /// Name the type was registered under. Null for default registration.
+        /// Name the registered type. Null for default registration.
         /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// The type that this registration is mapped to. If no type mapping was done, the
+        /// <see cref="INamedType.RegisteredType"/> property and this one will have the same value.
+        /// </summary>
+        Type MappedToType { get; }
 
         /// <summary>
         /// The lifetime manager for this registration.

@@ -1,17 +1,18 @@
 ﻿using Unity.Builder;
-using Unity.Resolution;
 
 namespace Unity.Policy
 {
     /// <summary>
-    /// A strategy that resolves a value.
+    /// A strategy that is used at build plan execution time
+    /// to resolve a dependent value.
     /// </summary>
     public interface IResolverPolicy : IBuilderPolicy
     {
         /// <summary>
         /// GetOrDefault the value
         /// </summary>
+        /// <param name="context">Current build context.</param>
         /// <returns>The value for the dependency.</returns>
-        object Resolve(params ResolverOverride[] args);
+        object Resolve(IBuilderContext context);
     }
 }

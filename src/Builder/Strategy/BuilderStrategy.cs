@@ -1,4 +1,5 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+﻿
+using Unity.Registration;
 
 namespace Unity.Builder.Strategy
 {
@@ -6,14 +7,18 @@ namespace Unity.Builder.Strategy
     /// Represents a strategy in the chain of responsibility.
     /// Strategies are required to support both BuildUp and TearDown.
     /// </summary>
-    public abstract class BuilderStrategy : IBuilderStrategy
+    public abstract class BuilderStrategy
     {
+
+        #region Build
+
         /// <summary>
         /// Called during the chain of responsibility for a build operation. The
         /// PreBuildUp method is called when the chain is being executed in the
         /// forward direction.
         /// </summary>
         /// <param name="context">Context of the build operation.</param>
+        /// <returns>Returns intermediate value or policy</returns>
         public virtual void PreBuildUp(IBuilderContext context)
         {
         }
@@ -27,5 +32,34 @@ namespace Unity.Builder.Strategy
         public virtual void PostBuildUp(IBuilderContext context)
         {
         }
+
+        #endregion
+
+
+        #region Registration and Analysis
+
+        /// <summary>
+        /// Analyses registered type
+        /// </summary>
+        /// <param name="container">Reference to hositng container</param>
+        /// <param name="registration">Reference to registration</param>
+        /// <returns>Returns true if this strategy will participate in building of registered type</returns>
+        public virtual bool RequiredToBuildType(IUnityContainer container, INamedType registration, params InjectionMember[] injectionMembers)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Analyses registered type
+        /// </summary>
+        /// <param name="container">Reference to hositng container</param>
+        /// <param name="registration">Reference to registration</param>
+        /// <returns>Returns true if this strategy will participate in building of registered type</returns>
+        public virtual bool RequiredToResolveInstance(IUnityContainer container, INamedType registration)
+        {
+            return false;
+        }
+
+        #endregion
     }
 }

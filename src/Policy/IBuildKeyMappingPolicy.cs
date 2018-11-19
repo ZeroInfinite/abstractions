@@ -17,6 +17,11 @@ namespace Unity.Policy
         /// if writing a more sophisticated mapping. This parameter can be null
         /// (called when getting container registrations).</param>
         /// <returns>The new build key.</returns>
-        NamedTypeBuildKey Map(NamedTypeBuildKey buildKey, IBuilderContext context);
+        INamedType Map(INamedType buildKey, IBuilderContext context);
+
+        /// <summary>
+        /// Instructs engine to resolve type rather than build it
+        /// </summary>
+        bool RequireBuild { get; }
     }
 }

@@ -68,10 +68,12 @@ namespace Unity.Injection
             GuardPropertyValueIsCompatible(propInfo, _parameterValue);
 
             SpecifiedPropertiesSelectorPolicy selector =
-                GetSelectorPolicy(policies, implementationType, name);
+                GetSelectorPolicy(policies, serviceType, name);
 
             selector.AddPropertyAndValue(propInfo, _parameterValue);
         }
+
+        public override bool BuildRequired => true;
 
         private InjectionParameterValue InitializeParameterValue(PropertyInfo propInfo)
         {
@@ -85,12 +87,12 @@ namespace Unity.Injection
         private static SpecifiedPropertiesSelectorPolicy GetSelectorPolicy(IPolicyList policies, Type typeToInject, string name)
         {
             NamedTypeBuildKey key = new NamedTypeBuildKey(typeToInject, name);
-            IPropertySelectorPolicy selector =
-                policies.GetNoDefault<IPropertySelectorPolicy>(key);
+            IPropertySelectorPolicy selector = 
+                (IPropertySelectorPolicy)policies.Get(typeToInject, name, typeof(IPropertySelectorPolicy), out _);
             if (!(selector is SpecifiedPropertiesSelectorPolicy))
             {
                 selector = new SpecifiedPropertiesSelectorPolicy();
-                policies.Set(selector, key);
+                policies.Set(key.Type, key.Name, typeof(IPropertySelectorPolicy), selector);
             }
             return (SpecifiedPropertiesSelectorPolicy)selector;
         }

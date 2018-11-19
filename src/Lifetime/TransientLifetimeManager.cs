@@ -8,6 +8,14 @@ namespace Unity.Lifetime
     /// </summary>
     public class TransientLifetimeManager : LifetimeManager
     {
+        public static TransientLifetimeManager Instance = new TransientLifetimeManager();
+
+        public override bool InUse
+        {
+            get => false;
+            set { }
+        }
+
         /// <summary>
         /// Retrieve a value from the backing store associated with this Lifetime policy.
         /// </summary>
@@ -18,21 +26,9 @@ namespace Unity.Lifetime
             return null;
         }
 
-        /// <summary>
-        /// Stores the given value into backing store for retrieval later.
-        /// </summary>
-        /// <param name="newValue">The object being stored.</param>
-        /// <param name="container">Instance of container which owns the value</param>
-        public override void SetValue(object newValue, ILifetimeContainer container = null)
+        protected override LifetimeManager OnCreateLifetimeManager()
         {
-        }
-
-        /// <summary>
-        /// Remove the given object from backing store.
-        /// <param name="container">Instance of container</param>
-        /// </summary>
-        public override void RemoveValue(ILifetimeContainer container = null)
-        {
+            return Instance;
         }
     }
 }

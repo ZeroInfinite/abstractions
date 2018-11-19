@@ -11,7 +11,9 @@ using Unity.Resolution;
 
 namespace Unity.Injection
 {
-    public class DelegateInjectionFactory : InjectionMember,  IBuildPlanPolicy
+    public class DelegateInjectionFactory : InjectionMember, 
+                                            IInjectionFactory,  
+                                            IBuildPlanPolicy
     {
         #region Fields
 
@@ -49,7 +51,7 @@ namespace Unity.Injection
 
         public override void AddPolicies(Type serviceType, Type implementationType, string name, IPolicyList policies)
         {
-            policies.Set<IBuildPlanPolicy>(this, new NamedTypeBuildKey(implementationType, name));
+            policies.Set(serviceType, name, typeof(IBuildPlanPolicy), this);
         }
 
         #endregion

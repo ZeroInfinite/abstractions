@@ -46,12 +46,22 @@ namespace Unity.Builder
         /// <value>
         /// The original build key for the build operation.
         /// </value>
-        NamedTypeBuildKey OriginalBuildKey { get; }
+        INamedType OriginalBuildKey { get; }
 
         /// <summary>
         /// GetOrDefault the current build key for the current build operation.
         /// </summary>
-        NamedTypeBuildKey BuildKey { get; set; }
+        INamedType BuildKey { get; set; }
+
+        /// <summary>
+        /// Set of policies associated with this registration
+        /// </summary>
+        IPolicySet Registration { get; }
+
+        /// <summary>
+        /// Reference to Lifetime manager which requires recovery
+        /// </summary>
+        IRequiresRecovery RequiresRecovery { get; set; }
 
         /// <summary>
         /// The set of policies that were passed into this context.
@@ -70,12 +80,6 @@ namespace Unity.Builder
         /// The policies for the current context.
         /// </value>
         IPolicyList Policies { get; }
-
-        /// <summary>
-        /// Gets the collection of <see cref="IRequiresRecovery"/> objects
-        /// that need to execute in event of an exception.
-        /// </summary>
-        IRecoveryStack RecoveryStack { get; }
 
         /// <summary>
         /// The current object being built up or torn down.
@@ -99,10 +103,15 @@ namespace Unity.Builder
         object CurrentOperation { get; set; }
 
         /// <summary>
-        /// The build context used to resolve a dependency during the build operation represented by this context.
+        /// The child build context.
         /// </summary>
         IBuilderContext ChildContext { get; }
 
+        /// <summary>
+        /// The parent build context.
+        /// </summary>
+        IBuilderContext ParentContext { get; }
+        
         /// <summary>
         /// Add a new set of resolver override objects to the current build operation.
         /// </summary>
@@ -110,24 +119,23 @@ namespace Unity.Builder
         void AddResolverOverrides(IEnumerable<ResolverOverride> newOverrides);
 
         /// <summary>
-        /// GetOrDefault a <see cref="IDependencyResolverPolicy"/> object for the given <paramref name="dependencyType"/>
+        /// GetOrDefault a <see cref="IResolverPolicy"/> object for the given <paramref name="dependencyType"/>
         /// or null if that dependency hasn't been overridden.
         /// </summary>
         /// <param name="dependencyType">Type of the dependency.</param>
         /// <returns>Resolver to use, or null if no override matches for the current operation.</returns>
-        IDependencyResolverPolicy GetOverriddenResolver(Type dependencyType);
+        IResolverPolicy GetOverriddenResolver(Type dependencyType);
 
         /// <summary>
-        /// A convenience method to do a new buildup operation on an existing context. This
-        /// overload allows you to specify extra policies which will be in effect for the duration
-        /// of the build.
+        /// A method to do a new buildup operation on an existing context.
         /// </summary>
-        /// <param name="newBuildKey">Key defining what to build up.</param>
+        /// <param name="type">Type of to build</param>
+        /// <param name="name">Name of the type to build</param>
         /// <param name="childCustomizationBlock">A delegate that takes a <see cref="IBuilderContext"/>. This
         /// is invoked with the new child context before the build up process starts. This gives callers
         /// the opportunity to customize the context for the build process.</param>
-        /// <returns>Created object.</returns>
-        object NewBuildUp(NamedTypeBuildKey newBuildKey, Action<IBuilderContext> childCustomizationBlock = null);
+        /// <returns>Resolved object</returns>
+        object NewBuildUp(Type type, string name, Action<IBuilderContext> childCustomizationBlock = null);
     }
 
     /// <summary>
@@ -136,32 +144,6 @@ namespace Unity.Builder
     /// </summary>
     public static class BuilderContextExtensions
     {
-        /// <summary>
-        /// Start a recursive build up operation to retrieve the default
-        /// value for the given <typeparamref name="TResult"/> type.
-        /// </summary>
-        /// <typeparam name="TResult">Type of object to build.</typeparam>
-        /// <param name="context">Parent context.</param>
-        /// <returns>Resulting object.</returns>
-        public static TResult NewBuildUp<TResult>(this IBuilderContext context)
-        {
-            return context.NewBuildUp<TResult>(null);
-        }
-
-        /// <summary>
-        /// Start a recursive build up operation to retrieve the named
-        /// implementation for the given <typeparamref name="TResult"/> type.
-        /// </summary>
-        /// <typeparam name="TResult">Type to resolve.</typeparam>
-        /// <param name="context">Parent context.</param>
-        /// <param name="name">Name to resolve with.</param>
-        /// <returns>The resulting object.</returns>
-        public static TResult NewBuildUp<TResult>(this IBuilderContext context, string name)
-        {
-            return (TResult)(context ?? throw new ArgumentNullException(nameof(context)))
-                .NewBuildUp(NamedTypeBuildKey.Make<TResult>(name));
-        }
-
         /// <summary>
         /// Add a set of <see cref="ResolverOverride"/>s to the context, specified as a 
         /// variable argument list.
@@ -182,11 +164,15 @@ namespace Unity.Builder
         /// <param name="context">Current build context.</param>
         public static void SetPerBuildSingleton(this IBuilderContext context)
         {
-            var lifetime = (context ?? throw new ArgumentNullException(nameof(context))).Policies.Get<ILifetimePolicy>(context.OriginalBuildKey);
+            var lifetime = (context ?? throw new ArgumentNullException(nameof(context)))
+                .Policies.GetOrDefault(typeof(ILifetimePolicy), context.OriginalBuildKey, out _);
+
             if (lifetime is PerResolveLifetimeManager)
             {
                 var perBuildLifetime = new InternalPerResolveLifetimeManager(context.Existing);
-                context.Policies.Set<ILifetimePolicy>(perBuildLifetime, context.OriginalBuildKey);
+                context.Policies.Set(context.OriginalBuildKey.Type, 
+                                     context.OriginalBuildKey.Name, 
+                                     typeof(ILifetimePolicy), perBuildLifetime);
             }
         }
 
